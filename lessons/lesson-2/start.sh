@@ -431,22 +431,6 @@ def client():
     return _local.r
 SHOPSTREAM_EOF
 
-say "1/4  Thundering herd with a naive cache"
-fresh_data
-start_app CACHE_MODE=naive
-python3 herd.py; python3 herd.py
-
-say "2/4  Same herd with the safe cache (rebuild lock + jittered TTL)"
-stop_bg; redis-cli -p 6390 flushall >/dev/null
-start_app CACHE_MODE=safe
-python3 herd.py; python3 herd.py
-
-say "3/4  Load test with the cache (compare with lesson 1)"
-python3 load.py --users 1,5,10,25,50,200 --seconds 4 | tee .run/results-lesson2.txt
-
-say "4/4  Cache statistics"
-python3 -c 'import json,urllib.request as u; print(json.load(u.urlopen("http://127.0.0.1:8080/stats")))'
-
 # ---- verify.sh -------------------------------------------------------------
 cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
 #!/usr/bin/env bash
@@ -466,6 +450,22 @@ echo
 echo "PASS  Lesson 2 complete. Your completion code: SHOP1-CACHE-4HX9"
 VERIFY_EOF
 chmod +x "$ROOT/verify.sh"
+
+say "1/4  Thundering herd with a naive cache"
+fresh_data
+start_app CACHE_MODE=naive
+python3 herd.py; python3 herd.py
+
+say "2/4  Same herd with the safe cache (rebuild lock + jittered TTL)"
+stop_bg; redis-cli -p 6390 flushall >/dev/null
+start_app CACHE_MODE=safe
+python3 herd.py; python3 herd.py
+
+say "3/4  Load test with the cache (compare with lesson 1)"
+python3 load.py --users 1,5,10,25,50,200 --seconds 4 | tee .run/results-lesson2.txt
+
+say "4/4  Cache statistics"
+python3 -c 'import json,urllib.request as u; print(json.load(u.urlopen("http://127.0.0.1:8080/stats")))'
 
 say "Done. ShopStream is running on http://127.0.0.1:8080"
 echo "Run ./verify.sh for your completion code, ./stop.sh when you are finished."
