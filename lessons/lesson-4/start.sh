@@ -761,26 +761,6 @@ def orders_for(user_id):
     return shard, [dict(r) for r in rows]
 SHOPSTREAM_EOF
 
-say "1/3  How many keys move when a 4th database joins? (100,000 keys)"
-python3 ring.py
-
-say "2/3  Fill 3 shards with 20,000 orders from 2,000 users, then place one through the API"
-fresh_data
-python3 fill.py 2000
-start_app
-python3 - <<'EOF'
-import json, urllib.request as u
-req = u.Request("http://127.0.0.1:8080/orders", json.dumps({"user_id": "user5", "product_id": 7}).encode(), {"Content-Type": "application/json"})
-print("POST /orders ->", json.load(u.urlopen(req)))
-mine = json.load(u.urlopen("http://127.0.0.1:8080/users/user5/orders"))
-print(f"GET /users/user5/orders -> {len(mine['orders'])} orders on {mine['shard']}")
-EOF
-
-say "3/3  Add shard3 and migrate only the users the ring moves"
-stop_bg
-python3 reshard.py --add shard3 | tee .run/results-lesson4.txt
-start_app
-
 # ---- verify.sh -------------------------------------------------------------
 cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
 #!/usr/bin/env bash
@@ -809,6 +789,26 @@ echo
 echo "PASS  Lesson 4 complete. Your completion code: SHOP1-RING-2VN8"
 VERIFY_EOF
 chmod +x "$ROOT/verify.sh"
+
+say "1/3  How many keys move when a 4th database joins? (100,000 keys)"
+python3 ring.py
+
+say "2/3  Fill 3 shards with 20,000 orders from 2,000 users, then place one through the API"
+fresh_data
+python3 fill.py 2000
+start_app
+python3 - <<'EOF'
+import json, urllib.request as u
+req = u.Request("http://127.0.0.1:8080/orders", json.dumps({"user_id": "user5", "product_id": 7}).encode(), {"Content-Type": "application/json"})
+print("POST /orders ->", json.load(u.urlopen(req)))
+mine = json.load(u.urlopen("http://127.0.0.1:8080/users/user5/orders"))
+print(f"GET /users/user5/orders -> {len(mine['orders'])} orders on {mine['shard']}")
+EOF
+
+say "3/3  Add shard3 and migrate only the users the ring moves"
+stop_bg
+python3 reshard.py --add shard3 | tee .run/results-lesson4.txt
+start_app
 
 say "Done. ShopStream is running on http://127.0.0.1:8080"
 echo "Run ./verify.sh for your completion code, ./stop.sh when you are finished."
