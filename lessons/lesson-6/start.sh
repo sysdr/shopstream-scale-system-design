@@ -1103,6 +1103,19 @@ if __name__ == "__main__":
     main()
 SHOPSTREAM_EOF
 
+# ---- verify.sh -------------------------------------------------------------
+cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
+#!/usr/bin/env bash
+# ShopStream lesson 6 check: prints your completion code when everything works.
+set -euo pipefail
+cd "$(dirname "$0")/shopstream"
+python3 -c 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8080/health", timeout=2)' 2>/dev/null || { echo "The app is not running: run ./start.sh first."; exit 1; }
+python3 queue_demo.py | tee /dev/stderr | grep -q "RESULT ok" || { echo "some receipts were lost or sent twice"; exit 1; }
+echo
+echo "PASS  Lesson 6 complete. Your completion code: SHOP1-QUEUE-3DX7"
+VERIFY_EOF
+chmod +x "$ROOT/verify.sh"
+
 say "1/3  Checkout with the receipt email sent inside the request (300 ms provider)"
 fresh_data
 start_app RECEIPTS=inline
@@ -1117,19 +1130,6 @@ say "3/3  Break the workers: 20% provider failures, a poison order, a crash befo
 python3 queue_demo.py | tee -a .run/results-lesson6.txt
 python3 worker.py worker-1 > .run/worker.log 2>&1 &
 echo $! > .run/worker.pid
-
-# ---- verify.sh -------------------------------------------------------------
-cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
-#!/usr/bin/env bash
-# ShopStream lesson 6 check: prints your completion code when everything works.
-set -euo pipefail
-cd "$(dirname "$0")/shopstream"
-python3 -c 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8080/health", timeout=2)' 2>/dev/null || { echo "The app is not running: run ./start.sh first."; exit 1; }
-python3 queue_demo.py | tee /dev/stderr | grep -q "RESULT ok" || { echo "some receipts were lost or sent twice"; exit 1; }
-echo
-echo "PASS  Lesson 6 complete. Your completion code: SHOP1-QUEUE-3DX7"
-VERIFY_EOF
-chmod +x "$ROOT/verify.sh"
 
 say "Done. ShopStream is running on http://127.0.0.1:8080"
 echo "Run ./verify.sh for your completion code, ./stop.sh when you are finished."
