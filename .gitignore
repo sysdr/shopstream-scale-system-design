@@ -1,0 +1,10 @@
+__pycache__/
+*.db
+*.db-shm
+*.db-wal
+shards.json
+replica_lag.json
+workers.log
+.run/
+lessons/*/shopstream/
+lessons/*/verify.sh
