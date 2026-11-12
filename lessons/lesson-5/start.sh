@@ -879,6 +879,20 @@ _, rep = call("GET", "/replication")
 print(f"read mode {rep['read_mode']}: {stale}/100 reads missed the order just placed; {leader}/100 served by the leader")
 SHOPSTREAM_EOF
 
+# ---- verify.sh -------------------------------------------------------------
+cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
+#!/usr/bin/env bash
+# ShopStream lesson 5 check: prints your completion code when everything works.
+set -euo pipefail
+cd "$(dirname "$0")/shopstream"
+python3 -c 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8080/health", timeout=2)' 2>/dev/null || { echo "The app is not running: run ./start.sh first."; exit 1; }
+[ -f .run/replica.pid ] && kill -0 "$(cat .run/replica.pid)" 2>/dev/null || { echo "replica.py is not running: run start.sh again"; exit 1; }
+python3 stale.py | tee /dev/stderr | grep -q "0/100 reads missed" || { echo "some reads missed the order just placed"; exit 1; }
+echo
+echo "PASS  Lesson 5 complete. Your completion code: SHOP1-RYW-6LQ5"
+VERIFY_EOF
+chmod +x "$ROOT/verify.sh"
+
 say "1/3  20,000 orders on 3 leader shards; start the replica (ships changelogs every 0.5 s)"
 fresh_data
 python3 fill.py 2000
@@ -897,20 +911,6 @@ python3 replica.py > .run/replica.log 2>&1 &
 echo $! > .run/replica.pid
 start_app READ_MODE=ryw
 python3 stale.py | tee -a .run/results-lesson5.txt
-
-# ---- verify.sh -------------------------------------------------------------
-cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
-#!/usr/bin/env bash
-# ShopStream lesson 5 check: prints your completion code when everything works.
-set -euo pipefail
-cd "$(dirname "$0")/shopstream"
-python3 -c 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:8080/health", timeout=2)' 2>/dev/null || { echo "The app is not running: run ./start.sh first."; exit 1; }
-[ -f .run/replica.pid ] && kill -0 "$(cat .run/replica.pid)" 2>/dev/null || { echo "replica.py is not running: run start.sh again"; exit 1; }
-python3 stale.py | tee /dev/stderr | grep -q "0/100 reads missed" || { echo "some reads missed the order just placed"; exit 1; }
-echo
-echo "PASS  Lesson 5 complete. Your completion code: SHOP1-RYW-6LQ5"
-VERIFY_EOF
-chmod +x "$ROOT/verify.sh"
 
 say "Done. ShopStream is running on http://127.0.0.1:8080"
 echo "Run ./verify.sh for your completion code, ./stop.sh when you are finished."
