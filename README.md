@@ -1,6 +1,6 @@
 # Scale ShopStream: System Design in 7 Builds (Python)
 
-Source code for the free course **[Scale ShopStream](https://systemdrd.com/course/scale-shopstream-system-design-in-7-builds-python/)** on [systemdrd.com](https://systemdrd.com).
+Source code for the free course **[Scale ShopStream](https://systemdrd.com/courses/system-design-scale-shopstream-in-7-builds/)** on [systemdrd.com](https://systemdrd.com).
 
 You take a small online-shop API, push it until it breaks, and fix it with the patterns large systems use. Every lesson has a failure you cause on purpose and a number you measure before and after.
 
