@@ -261,18 +261,6 @@ if __name__ == "__main__":
         print(f"{r['users']:>6} {r['rps']:>7} {r['p50']:>8} {r['p99']:>8} {r['errors']:>7}", flush=True)
 SHOPSTREAM_EOF
 
-say "1/3  Seeding 2,000 products and 200,000 reviews (first run takes a few seconds)"
-fresh_data
-start_app
-curl_json() { python3 -c 'import json,sys,urllib.request as u; print(json.dumps(json.load(u.urlopen(sys.argv[1])), indent=1))' "$1"; }
-curl_json http://127.0.0.1:8080/products/7
-
-say "2/3  Load test: 1, 5, 10, 25 and 50 concurrent users, 4 seconds each"
-python3 load.py --users 1,5,10,25,50 --seconds 4 | tee .run/results-lesson1.txt
-
-say "3/3  Break it: 200 users"
-python3 load.py --users 200 --seconds 4 | tee -a .run/results-lesson1.txt
-
 # ---- verify.sh -------------------------------------------------------------
 cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
 #!/usr/bin/env bash
@@ -290,6 +278,18 @@ echo
 echo "PASS  Lesson 1 complete. Your completion code: SHOP1-LOAD-7K2Q"
 VERIFY_EOF
 chmod +x "$ROOT/verify.sh"
+
+say "1/3  Seeding 2,000 products and 200,000 reviews (first run takes a few seconds)"
+fresh_data
+start_app
+curl_json() { python3 -c 'import json,sys,urllib.request as u; print(json.dumps(json.load(u.urlopen(sys.argv[1])), indent=1))' "$1"; }
+curl_json http://127.0.0.1:8080/products/7
+
+say "2/3  Load test: 1, 5, 10, 25 and 50 concurrent users, 4 seconds each"
+python3 load.py --users 1,5,10,25,50 --seconds 4 | tee .run/results-lesson1.txt
+
+say "3/3  Break it: 200 users"
+python3 load.py --users 200 --seconds 4 | tee -a .run/results-lesson1.txt
 
 say "Done. ShopStream is running on http://127.0.0.1:8080"
 echo "Run ./verify.sh for your completion code, ./stop.sh when you are finished."
