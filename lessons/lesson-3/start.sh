@@ -551,16 +551,6 @@ def client():
     return _local.r
 SHOPSTREAM_EOF
 
-say "1/2  A bot vs 5 shoppers, rate limiter OFF (10 s)"
-fresh_data
-start_app RATE_LIMIT=off
-python3 botdemo.py | tee .run/results-lesson3.txt
-
-say "2/2  Same fight, token bucket ON: 5 orders burst, then 1 per second per user (10 s)"
-fresh_data
-start_app RATE_LIMIT=on
-python3 botdemo.py | tee -a .run/results-lesson3.txt
-
 # ---- verify.sh -------------------------------------------------------------
 cat > "$ROOT/verify.sh" <<'VERIFY_EOF'
 #!/usr/bin/env bash
@@ -585,6 +575,16 @@ echo
 echo "PASS  Lesson 3 complete. Your completion code: SHOP1-LIMIT-9TB3"
 VERIFY_EOF
 chmod +x "$ROOT/verify.sh"
+
+say "1/2  A bot vs 5 shoppers, rate limiter OFF (10 s)"
+fresh_data
+start_app RATE_LIMIT=off
+python3 botdemo.py | tee .run/results-lesson3.txt
+
+say "2/2  Same fight, token bucket ON: 5 orders burst, then 1 per second per user (10 s)"
+fresh_data
+start_app RATE_LIMIT=on
+python3 botdemo.py | tee -a .run/results-lesson3.txt
 
 say "Done. ShopStream is running on http://127.0.0.1:8080"
 echo "Run ./verify.sh for your completion code, ./stop.sh when you are finished."
