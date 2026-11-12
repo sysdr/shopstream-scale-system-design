@@ -8,3 +8,4 @@ workers.log
 .run/
 lessons/*/shopstream/
 lessons/*/verify.sh
+test-logs/

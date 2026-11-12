@@ -31,6 +31,15 @@ bash stop.sh
 
 Each `start.sh` writes the complete code for that lesson, so you can start at any lesson. It runs its own Redis on port 6390 and the app on port 8080.
 
+## Test every lesson
+
+```bash
+bash test_all.sh          # all 7 lessons, about 4 minutes
+bash test_all.sh 1 3      # only lessons 1 and 3
+```
+
+Each lesson runs in a fresh temporary folder and must print its completion code. Logs go to `test-logs/`. Tested on Ubuntu 24.04 with Python 3.12 and 3.13 and Redis 7.0; the code also runs on Python 3.10.
+
 ## The finished system
 
 The repository root holds the final code (lesson 7):
